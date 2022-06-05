@@ -6,43 +6,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Battleships</title>
     <link rel="stylesheet" href="style.css" />
-    <!-- <style class="css"></style> -->
+    <style class="css"></style>
+    <script src="index.js" defer></script>
   </head>
   <body>
     <div class="board-container">
-      <div class="grid player-board"></div>
-      <div class="grid ai-board"></div>
+      <div class="grid player-board" data-user-board></div>
+      <div class="grid computer-board" data-computer-board></div>
     </div>
 
     <div class="hidden-container">
-      <button class="start-game">Start Game</button>
-      <button class="rotate-ship">Rotate Ships</button>
+      <button class="start-game" data-start-button>Start Game</button>
+      <button class="rotate-ship" data-rotate-button>Rotate Ships</button>
       <h3 class="whose-turn"></h3>
       <h3 class="info"></h3>
     </div>
 
-    <div class="ships-board">
-      <div class="ship destroyer-container" draggable="true">
+    <div class="ships-container">
+      <div
+        class="ship destroyer-container"
+        data-ship
+        data-destroyer-ship
+        draggable="true"
+      >
         <div id="destroyer-0"></div>
         <div id="destroyer-1"></div>
       </div>
-      <div class="ship submarine-container" draggable="true">
+      <div
+        class="ship submarine-container"
+        data-ship
+        data-submarine-ship
+        draggable="true"
+      >
         <div id="submarine-0"></div>
         <div id="submarine-1"></div>
         <div id="submarine-2"></div>
       </div>
-      <div class="ship cruiser-container" draggable="true">
+      <div
+        class="ship cruiser-container"
+        data-ship
+        data-cruiser-ship
+        draggable="true"
+      >
         <div id="cruiser-0"></div>
         <div id="cruiser-1"></div>
         <div id="cruiser-2"></div>
       </div>
-      <div class="ship battleship-container" draggable="true">
+      <div
+        class="ship battleship-container"
+        data-ship
+        data-battleship-ship
+        draggable="true"
+      >
         <div id="battleship-0"></div>
         <div id="battleship-1"></div>
         <div id="battleship-2"></div>
         <div id="battleship-3"></div>
       </div>
-      <div class="ship carrier-container" draggable="true">
+      <div
+        class="ship carrier-container"
+        data-ship
+        data-carrier-ship
+        draggable="true"
+      >
         <div id="carrier-0"></div>
         <div id="carrier-1"></div>
         <div id="carrier-2"></div>
