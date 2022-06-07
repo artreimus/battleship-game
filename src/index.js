@@ -1,4 +1,4 @@
-import './style.css';
+// import './style.css';
 
 const userBoard = document.querySelector('[data-user-board]');
 const computerBoard = document.querySelector('[data-computer-board]');
@@ -192,9 +192,13 @@ function dragDrop() {
     && !newNotAllowedHorizontal.includes(shipLastId)
   ) {
     for (let i = 0; i < draggedShipLength; i += 1) {
+      let directionClass;
+      if (i === 0) directionClass = 'start';
+      if (i !== 0 && i !== draggedShipLength - 1) directionClass = 'middle';
+      if (i === draggedShipLength - 1) directionClass = 'end';
       playerSquares[
         parseInt(this.dataset.id, 10) - selectedShipIndex + i
-      ].classList.add('taken', shipClass);
+      ].classList.add('taken', 'horizontal', directionClass, shipClass);
     }
   } else if (
     !isDivTaken
@@ -202,9 +206,13 @@ function dragDrop() {
     && !newNotAllowedVertical.includes(shipLastId)
   ) {
     for (let i = 0; i < draggedShipLength; i += 1) {
+      let directionClass;
+      if (i === 0) directionClass = 'start';
+      if (i !== 0 && i !== draggedShipLength - 1) directionClass = 'middle';
+      if (i === draggedShipLength - 1) directionClass = 'end';
       playerSquares[
         parseInt(this.dataset.id, 10) - selectedShipIndex + width * i
-      ].classList.add('taken', shipClass);
+      ].classList.add('taken', 'vertical', shipClass, directionClass);
     }
   } else return;
 
