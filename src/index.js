@@ -1,4 +1,4 @@
-// import './style.css';
+import './style.css';
 
 const userBoard = document.querySelector('[data-user-board]');
 const computerBoard = document.querySelector('[data-computer-board]');
@@ -11,8 +11,10 @@ const startButton = document.querySelector('[data-start-button]');
 const rotateButton = document.querySelector('[data-rotate-button]');
 const ships = document.querySelectorAll('.ship');
 const shipsContainer = document.querySelector('[data-ships-container]');
+const infoContainer = document.querySelector('[data-info-container]');
 const turnDisplay = document.querySelector('[data-turn-display]');
-const infoDisplay = document.querySelector('[data-info-display]');
+
+const buttonContainer = document.querySelector('[data-button-container]');
 const playerSquares = [];
 const computerSquares = [];
 const width = 10;
@@ -24,6 +26,8 @@ let draggedShip;
 let draggedShipLength;
 let playerTotal;
 let computerTotal;
+let winner;
+let sunkShip;
 
 // Create board
 function displayBoard(grid, squares) {
@@ -228,18 +232,53 @@ function preventEventDefault(e) {
   e.preventDefault();
 }
 
-function dragShips(ships) {
+function dragShips() {
   ships.forEach((ship) => ship.addEventListener('dragstart', dragStart));
   ships.forEach((ship) => ship.addEventListener('mousedown', (e) => {
     selectedShipNameWithIndex = e.target.id;
   }));
 }
 
-function dragSquares(playerSquares) {
+function dragSquares() {
   playerSquares.forEach((square) => square.addEventListener('dragstart', dragStart));
   playerSquares.forEach((square) => square.addEventListener('dragover', preventEventDefault));
   playerSquares.forEach((square) => square.addEventListener('dragenter', preventEventDefault));
   playerSquares.forEach((square) => square.addEventListener('drop', dragDrop));
+}
+
+function createAlert(message) {
+  const infoDisplay = document.createElement('div');
+  infoContainer.appendChild(infoDisplay);
+  infoDisplay.className = 'info-display';
+  infoDisplay.appendChild(document.createTextNode(message));
+
+  setTimeout(() => {
+    infoDisplay.remove();
+  }, 2000);
+}
+
+function displayAlert(eventAlert) {
+  let alertDisplay;
+
+  if (eventAlert === 'alert-start-error') {
+    alertDisplay = 'Cannot start the game without placing all ships.';
+    createAlert(alertDisplay);
+  } else if (eventAlert === 'alert-player-sunk') {
+    alertDisplay = `You sunk a ${sunkShip}!`;
+    createAlert(alertDisplay);
+  } else if (eventAlert === 'alert-computer-sunk') {
+    alertDisplay = `Computer sunk a ${sunkShip}!`;
+    createAlert(alertDisplay);
+  } else if (eventAlert === 'alert-player-hit') {
+    alertDisplay = 'You hit a ship!';
+    createAlert(alertDisplay);
+  } else if (eventAlert === 'alert-computer-hit') {
+    alertDisplay = 'The computer hit a ship!';
+    createAlert(alertDisplay);
+  } else if (eventAlert === 'alert-winner') {
+    alertDisplay = `${winner} wins!`;
+    createAlert(alertDisplay);
+  }
 }
 
 function createShipsTally() {
@@ -263,6 +302,70 @@ function changeTurn() {
   }
 }
 
+function checkComputerShips() {
+  if (computerScore.destroyer === 2) {
+    sunkShip = 'Destroyer';
+    displayAlert('alert-computer-sunk');
+    computerScore.destroyer = 10;
+  }
+  if (computerScore.submarine === 3) {
+    sunkShip = 'Submarine';
+    displayAlert('alert-computer-sunk');
+    computerScore.submarine = 10;
+  }
+  if (computerScore.cruiser === 3) {
+    sunkShip = 'Cruiser';
+    displayAlert('alert-computer-sunk');
+    computerScore.cruiser = 10;
+  }
+  if (computerScore.battleship === 4) {
+    sunkShip = 'Battleship';
+    displayAlert('alert-computer-sunk');
+    computerScore.battleship = 10;
+  }
+  if (computerScore.carrier === 5) {
+    sunkShip = 'Carrier';
+    displayAlert('alert-computer-sunk');
+    computerScore.carrier = 10;
+  }
+}
+
+function checkPlayerShips() {
+  if (playerScore.destroyer === 2) {
+    sunkShip = 'Destroyer';
+    displayAlert('alert-player-sunk');
+    playerScore.destroyer = 10;
+  }
+  if (playerScore.submarine === 3) {
+    sunkShip = 'Submarine';
+    displayAlert('alert-player-sunk');
+    playerScore.submarine = 10;
+  }
+  if (playerScore.cruiser === 3) {
+    sunkShip = 'Cruiser';
+    displayAlert('alert-player-sunk');
+    playerScore.cruiser = 10;
+  }
+  if (playerScore.battleship === 4) {
+    sunkShip = 'Battleship';
+    displayAlert('alert-player-sunk');
+    playerScore.battleship = 10;
+  }
+  if (playerScore.carrier === 5) {
+    sunkShip = 'Carrier';
+    displayAlert('alert-player-sunk');
+    playerScore.carrier = 10;
+  }
+}
+
+function checkShips() {
+  checkPlayerShips();
+  checkComputerShips();
+  playerTotal = Object.values(playerScore).reduce((total, value) => total + value, 0);
+  computerTotal = Object.values(computerScore).reduce((total, value) => total + value, 0);
+  console.log(computerTotal);
+}
+
 function checkHit(square) {
   if (square.classList.contains('boom')) {
     if (square.classList.contains('destroyer')) playerScore.destroyer += 1;
@@ -270,7 +373,49 @@ function checkHit(square) {
     if (square.classList.contains('cruiser')) playerScore.cruiser += 1;
     if (square.classList.contains('battleship')) playerScore.battleship += 1;
     if (square.classList.contains('carrier')) playerScore.carrier += 1;
+    displayAlert('alert-player-hit');
     checkShips();
+  }
+}
+
+function computerGo() {
+  const random = Math.floor(Math.random() * playerSquares.length);
+  const hit = playerSquares[random].classList.contains('taken');
+  playerSquares[random].classList.add(hit ? 'boom' : 'miss');
+  if (!playerSquares[random].classList.contains('boom') || !playerSquares[random].classList.contains('miss')) {
+    if (playerSquares[random].classList.contains('destroyer')) {
+      computerScore.destroyer += 1;
+      displayAlert('alert-computer-hit');
+    }
+    if (playerSquares[random].classList.contains('submarine')) {
+      computerScore.submarine += 1;
+      displayAlert('alert-computer-hit');
+    }
+    if (playerSquares[random].classList.contains('cruiser')) {
+      computerScore.cruiser += 1;
+      displayAlert('alert-computer-hit');
+    }
+    if (playerSquares[random].classList.contains('battleship')) {
+      computerScore.battleship += 1;
+      displayAlert('alert-computer-hit');
+    }
+    if (playerSquares[random].classList.contains('carrier')) {
+      computerScore.carrier += 1;
+      displayAlert('alert-computer-hit');
+    }
+  } else computerGo();
+  checkShips();
+  turnDisplay.innerHTML = 'Your turn';
+}
+
+function playTurn() {
+  if (currentPlayer === 'user') {
+    turnDisplay.innerHTML = 'Your Turn';
+  } else if (currentPlayer === 'computer') {
+    turnDisplay.innerHTML = 'Computer\'s Turn';
+    setTimeout(computerGo, 1500);
+    changeTurn();
+    checkForWins();
   }
 }
 
@@ -294,52 +439,35 @@ function revealSquare(square) {
   }
 }
 
-function computerGo() {
-  const random = Math.floor(Math.random() * playerSquares.length);
-  if (!playerSquares[random].classList.contains('boom')) {
-    playerSquares[random].classList.add('boom');
-    if (playerSquares[random].classList.contains('destroyer')) {
-      computerScore.destroyer += 1;
-    }
-    if (playerSquares[random].classList.contains('submarine')) {
-      computerScore.submarine += 1;
-    }
-    if (playerSquares[random].classList.contains('cruiser')) {
-      computerScore.cruiser += 1;
-    }
-    if (playerSquares[random].classList.contains('battleship')) {
-      computerScore.battleship += 1;
-    }
-    if (playerSquares[random].classList.contains('carrier')) {
-      computerScore.carrier += 1;
-    }
-  } else computerGo();
-  checkShips();
-  currentPlayer = 'user';
-  turnDisplay.innerHTML = 'Your Go';
-}
-
-function playTurn() {
-  if (currentPlayer === 'user') {
-    turnDisplay.innerHTML = 'Your Go';
-  } else if (currentPlayer === 'computer') {
-    turnDisplay.innerHTML = 'Computers Go';
-    setTimeout(computerGo, 100);
-    checkForWins();
-    changeTurn();
-  }
-}
-
 function playGame() {
-  computerSquares.forEach((square) => square.addEventListener('click', () => {
-    revealSquare(square);
-  }));
-  playTurn();
+  if (shipsContainer.children.length === 0) {
+    computerSquares.forEach((square) => square.addEventListener('click', () => {
+      revealSquare(square);
+    }));
+    buttonContainer.style.display = 'none';
+    playTurn();
+  } else {
+    displayAlert('alert-start-error');
+  }
 }
 
 function gameOver() {
   isGameOver = true;
   startButton.removeEventListener('click', playGame);
+}
+
+function checkForWins() {
+  if (playerTotal === 50) {
+    // infoDisplay.innerHTML = 'Player One Wins!';
+    winner = 'Player One';
+    displayAlert('alert-winner');
+    gameOver();
+  } else if (computerTotal === 50) {
+    // infoDisplay.innerHTML = 'Computer Wins!';
+    winner = 'Computer';
+    displayAlert('alert-winner');
+    gameOver();
+  }
 }
 
 function runGame() {
@@ -348,74 +476,9 @@ function runGame() {
   const battleShips = createShips();
   displayComputerShips(battleShips);
   rotateButton.addEventListener('click', rotateShips);
-  dragShips(ships);
-  dragSquares(playerSquares);
+  dragShips();
+  dragSquares();
   startButton.addEventListener('click', playGame);
 }
 
 runGame();
-
-function checkComputerShips() {
-  if (computerScore.destroyer === 2) {
-    infoDisplay.innerHTML = 'Computer  sunk the computers Destroyer';
-    computerScore.destroyer = 10;
-  }
-  if (computerScore.submarine === 3) {
-    infoDisplay.innerHTML = 'Computer  sunk the computers Submarine';
-    computerScore.submarine = 10;
-  }
-  if (computerScore.cruiser === 3) {
-    infoDisplay.innerHTML = 'Computer  sunk the computers Cruiser';
-    computerScore.cruiser = 10;
-  }
-  if (computerScore.battleship === 4) {
-    infoDisplay.innerHTML = 'Computer  sunk the computers Battleship';
-    computerScore.battleship = 10;
-  }
-  if (computerScore.carrier === 5) {
-    infoDisplay.innerHTML = 'Computer sunk the computers Carrier';
-    computerScore.carrier = 10;
-  }
-}
-
-function checkPlayerShips() {
-  if (playerScore.destroyer === 2) {
-    infoDisplay.innerHTML = 'You sunk the computers destroyer';
-    playerScore.destroyer = 10;
-  }
-  if (playerScore.submarine === 3) {
-    infoDisplay.innerHTML = 'You sunk the computers submarine';
-    playerScore.submarine = 10;
-  }
-  if (playerScore.cruiser === 3) {
-    infoDisplay.innerHTML = 'You sunk the computers cruiser';
-    playerScore.cruiser = 10;
-  }
-  if (playerScore.battleship === 4) {
-    infoDisplay.innerHTML = 'You sunk the computers battleship';
-    playerScore.battleship = 10;
-  }
-  if (playerScore.carrier === 5) {
-    infoDisplay.innerHTML = 'You sunk the computers carrier';
-    playerScore.carrier = 10;
-  }
-}
-
-function checkShips() {
-  checkPlayerShips();
-  checkComputerShips();
-  playerTotal = Object.values(playerScore).reduce((total, value) => total + value, 0);
-  console.log(`Player Score: ${playerTotal}`);
-  computerTotal = Object.values(computerScore).reduce((total, value) => total + value, 0);
-  console.log(`Computer Score: ${computerTotal}`);
-}
-
-function checkForWins() {
-  if (playerTotal === 50) {
-    infoDisplay.innerHTML = 'Player One Wins!';
-    gameOver();
-  } else if (computerTotal === 50) {
-    infoDisplay.innerHTML = 'Computer Wins!';
-    gameOver();
-  }
-}
